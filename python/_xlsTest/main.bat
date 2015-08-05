@@ -1,3 +1,3 @@
 del *.pyc
 cls
-createMem.py 2015 7
+createAttendanceBook.py 2015 2
