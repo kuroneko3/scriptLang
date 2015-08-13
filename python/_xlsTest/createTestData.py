@@ -12,7 +12,8 @@ def createTestData ( year, month ) :
     params = []
     
     param = cOutputParam ()
-    param.name	= u"試験  太郎"
+    param.m_name	= u"試験  太郎"
+    param.m_sheetName   = u"テスト"
 
     param.m_year = year
     param.m_month = month

@@ -49,36 +49,46 @@ def _str2time ( timeStr ):
 
 def _setDateParam_ ( sheet, dateParam ):
 	
-	#	行数を設定
-	column = dateParam.day + top
+    #	行数を設定
+    column = dateParam.day + top
 	
-	#	曜日
-	#sheet.write ( column, left + 1, _getDayOfWeek ( dateParam.dayOfWeek ) )
+    #	出欠
+    sheet.write ( column, left + 2, dateParam.come )
 	
-	#	出欠
-	sheet.write ( column, left + 2, dateParam.come )
+    #	遅刻
+    sheet.write ( column, left + 3, _getLate ( dateParam.late ) )
 	
-	#	遅刻
-	sheet.write ( column, left + 3, _getLate ( dateParam.late ) )
+    #	早退
+    sheet.write ( column, left + 4, _getEarly ( dateParam.early ) )
 	
-	#	早退
-	sheet.write ( column, left + 4, _getEarly ( dateParam.early ) )
+    #	外出
+    sheet.write ( column, left + 5, _getGoOut ( dateParam.goOut ) )
 	
-	#	外出
-	sheet.write ( column, left + 5, _getGoOut ( dateParam.goOut ) )
+    #	出社時間
+    sheet.write ( column, left + 6, _str2time ( dateParam.comeTime ) )
 	
-	#	出社時間
-	sheet.write ( column, left + 6, _str2time ( dateParam.comeTime ) )
+    #	退社時間
+    sheet.write ( column, left + 7, _str2time ( dateParam.leaveTime ) )
 	
-	#	退社時間
-	sheet.write ( column, left + 7, _str2time ( dateParam.leaveTime ) )
-	
-        #   差し引き
-        sheet.write ( column, left + 11, _str2time ( dateParam.minusTime ) )
+    #   差し引き
+    sheet.write ( column, left + 11, _str2time ( dateParam.minusTime ) )
 
-        #   申請残業
-        sheet.write ( column, left + 13, _str2time ( dateParam.applyRemainTime ) )
+    #   申請残業
+    sheet.write ( column, left + 13, _str2time ( dateParam.applyRemainTime ) )
 
+def _getCellStyle ( isDayCell, day ):
+    pattern = xlwt.Pattern ()
+    pattern.pattern = xlwt.Pattern.SOLID_PATTERN
+#    pattern.pattern_fore_colour = 0x1F
+    pattern.pattern_fore_colour = 0x00
+    
+    border = xlwt.Borders ()
+#    border.top      = xlwt.Borders.THICK
+#    border.bottom   = xlwt.Borders.THICK
+    
+    style = xlwt.XFStyle ()
+    style.pattern = pattern
+    return style
 
 def _setFormula ( sheet, year, month, day ):
     
@@ -86,7 +96,12 @@ def _setFormula ( sheet, year, month, day ):
     column = day + top
 
     #	曜日
-    sheet.write ( column, left + 1, _getDayOfWeek_ ( year, month, day ) )
+    dayOfWeek = _getDayOfWeek_ ( year, month, day )
+    sheet.write ( column, left + 1, dayOfWeek )
+
+    #   休日、祝日の場合はセルに色を付ける
+    if ( dayOfWeek == u'土' or dayOfWeek == u'日' ):
+        sheet.write ( column, left, u'休み', _getCellStyle ( False, day ) )
     
     #	残業時間(単純計算)
     formula = xlwt.Formula ( u'IF(C{0}=\"出\",IF(H{0}<G{0},H{0}+1-$I$4,H{0}-$I$4),\"\")'.format ( column + 1 ) )
@@ -135,10 +150,25 @@ def _setDataParams_ ( sheet, param ):
     for i in range ( monthLastDay + 1, 32 ):
         sheet.write ( i+top, 0, '' )
 
-def addParameterForSheet ( book, param ):
+def _selectWriteSheet ( sheetNames, sheetName ):
+    
+    sheetNum = 0
+    for name in sheetNames:
+        if ( name == sheetName ):
+            return sheetNum
+        sheetNum += 1
+
+
+    return -1
+
+def addParameterForSheet ( book, param, sheetNames ):
     
     #   書き込むシートを選択する
-    sheet = book.get_sheet( 0 )
+    sheetNum = _selectWriteSheet ( sheetNames, param.m_sheetName )
+    if ( sheetNum == -1 ):
+        return
+
+    sheet = book.get_sheet( sheetNum )
     
     #   シートにデータを書き込む
     _setDataParams_ ( sheet, param )

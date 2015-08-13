@@ -6,7 +6,6 @@ class cDateParam:
 	
     def __init__ ( self ):
         self.day                = 0         #	日付
-        self.dayOfWeek          = 0         #	曜日, 0 = 日, 1 = 月・・・
         self.come               = u"出"     #	出欠
         self.late               = False     #	遅刻
         self.early              = False     #	早退

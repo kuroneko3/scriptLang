@@ -23,8 +23,11 @@ def outputAttendanceBook ( outputFileName, attendanceData ):
     #   テンプレートを出力用にコピー
     outBook = copy ( tempBook )
 
+    #   シート名一覧を生成
+    sheetNames = tempBook.sheet_names ()
+
     #   値を設定
-    addParameterForSheet ( outBook, attendanceData )
+    addParameterForSheet ( outBook, attendanceData, sheetNames )
 
     #   xlsファイルを出力する
     outBook.save ( outputFileName )
